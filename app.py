@@ -37,6 +37,51 @@ st.set_page_config(
     page_icon="🏆",
     layout="wide"
 )
+def get_ipv4_host(hostname: str) -> str:
+    infos = socket.getaddrinfo(hostname, None, family=socket.AF_INET)
+    return infos[0][4][0]
+
+def db_healthcheck():
+    try:
+        host = st.secrets["db"]["host"]
+        host_ipv4 = get_ipv4_host(host)
+        conn = psycopg2.connect(
+            host=host_ipv4,
+            port=st.secrets["db"]["port"],
+            dbname=st.secrets["db"]["dbname"],
+            user=st.secrets["db"]["user"],
+            password=st.secrets["db"]["password"],
+            sslmode="require",
+            connect_timeout=5,
+        )
+        conn.close()
+        return True, "DB Connected"
+    except Exception as e:
+        return False, f"DB Error: {type(e).__name__}"
+
+ok, msg = db_healthcheck()
+badge_color = "#00C48C" if ok else "#FF4D4F"
+
+st.markdown(
+    f"""
+    <div style="
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 9999;
+        background: #1A1F2E;
+        border: 1px solid {badge_color};
+        color: #EAEAEA;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        ">
+        <span style="color:{badge_color};">●</span> {msg}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # -------------------
 # PREMIUM DARK THEME
