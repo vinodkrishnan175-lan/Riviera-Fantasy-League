@@ -1,14 +1,24 @@
 import streamlit as st
 import pandas as pd
 import psycopg2
+import socket
 
 # -------------------
 # DB CONNECTION TEST
 # -------------------
+def get_ipv4_host(hostname: str) -> str:
+    # Resolve hostname to IPv4 to avoid IPv6 connectivity issues on Streamlit Cloud
+    infos = socket.getaddrinfo(hostname, None, family=socket.AF_INET)
+    # infos[0][4][0] is the IPv4 string
+    return infos[0][4][0]
+
 def test_connection():
     try:
+        host = st.secrets["db"]["host"]
+        host_ipv4 = get_ipv4_host(host)
+
         conn = psycopg2.connect(
-            host=st.secrets["db"]["host"],
+            host=host_ipv4,  # use IPv4 address
             port=st.secrets["db"]["port"],
             dbname=st.secrets["db"]["dbname"],
             user=st.secrets["db"]["user"],
@@ -19,13 +29,6 @@ def test_connection():
         return True
     except Exception as e:
         return str(e)
-
-status = test_connection()
-if status is True:
-    st.success("Database connected successfully.")
-else:
-    st.error(f"Database connection failed: {status}")
-
 # -------------------
 # PAGE CONFIG
 # -------------------
