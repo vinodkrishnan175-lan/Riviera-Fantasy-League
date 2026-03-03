@@ -1,3 +1,27 @@
+# -------------------
+# DB CONNECTION TEST
+# -------------------
+def test_connection():
+    try:
+        conn = psycopg2.connect(
+            host=st.secrets["db"]["host"],
+            port=st.secrets["db"]["port"],
+            dbname=st.secrets["db"]["dbname"],
+            user=st.secrets["db"]["user"],
+            password=st.secrets["db"]["password"],
+            sslmode="require"
+        )
+        conn.close()
+        return True
+    except Exception as e:
+        return str(e)
+
+status = test_connection()
+if status is True:
+    st.success("Database connected successfully.")
+else:
+    st.error(f"Database connection failed: {status}")
+
 import streamlit as st
 import pandas as pd
 import psycopg2
