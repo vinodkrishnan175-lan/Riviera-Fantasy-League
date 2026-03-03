@@ -1,3 +1,7 @@
+import streamlit as st
+import pandas as pd
+import psycopg2
+
 # -------------------
 # DB CONNECTION TEST
 # -------------------
@@ -21,10 +25,6 @@ if status is True:
     st.success("Database connected successfully.")
 else:
     st.error(f"Database connection failed: {status}")
-
-import streamlit as st
-import pandas as pd
-import psycopg2
 
 # -------------------
 # PAGE CONFIG
