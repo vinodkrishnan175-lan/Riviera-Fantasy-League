@@ -33,6 +33,11 @@ def db_healthcheck():
         return False, f"DB Error: {type(e).__name__}"
 
 ok, msg = db_healthcheck()
+if ok:
+    st.success(msg)
+else:
+    st.error(f"{msg} (host={st.secrets['db']['host']})")
+    st.stop()
 # -------------------
 # PAGE CONFIG
 # -------------------
