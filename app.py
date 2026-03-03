@@ -3,35 +3,46 @@ import pandas as pd
 import psycopg2
 import socket
 
+
+
 # -------------------
 # DB CONNECTION TEST
 # -------------------
+import socket
+
 def get_ipv4_host(hostname: str) -> str:
-    # Resolve hostname to IPv4 to avoid IPv6 connectivity issues on Streamlit Cloud
     infos = socket.getaddrinfo(hostname, None, family=socket.AF_INET)
-    # infos[0][4][0] is the IPv4 string
     return infos[0][4][0]
 
-def test_connection():
+def db_healthcheck():
     try:
         host = st.secrets["db"]["host"]
         host_ipv4 = get_ipv4_host(host)
-
         conn = psycopg2.connect(
-            host=host_ipv4,  # use IPv4 address
+            host=host_ipv4,
             port=st.secrets["db"]["port"],
             dbname=st.secrets["db"]["dbname"],
             user=st.secrets["db"]["user"],
             password=st.secrets["db"]["password"],
-            sslmode="require"
+            sslmode="require",
+            connect_timeout=5,
         )
         conn.close()
-        return True
+        return True, "DB Connected"
     except Exception as e:
-        return str(e)
+        return False, f"DB Error: {type(e).__name__}"
+
+ok, msg = db_healthcheck()
 # -------------------
 # PAGE CONFIG
 # -------------------
+left, right = st.columns([5, 2])
+with right:
+    if ok:
+        st.success(msg)
+    else:
+        st.error(msg)
+        st.stop()
 st.set_page_config(
     page_title="Riviera Fantasy League",
     page_icon="🏆",
