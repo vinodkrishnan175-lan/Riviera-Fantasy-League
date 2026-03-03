@@ -30,7 +30,7 @@ def db_healthcheck():
         conn.close()
         return True, "DB Connected"
     except Exception as e:
-        return False, f"DB Error: {type(e).__name__}"
+        return False, f"DB Error: {type(e).__name__}: {e}"
 
 ok, msg = db_healthcheck()
 if ok:
